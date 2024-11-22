@@ -3,17 +3,16 @@ return {
     'echasnovski/mini.nvim',
     version = false,
     lazy = false,
+    dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects' },
     config = function()
-        -- Better Around/Inside textobjects
-        --
-        -- Examples:
-        --  - va)  - [V]isually select [A]round [)]paren
-        --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
-        --  - ci'  - [C]hange [I]nside [']quote
-        require('mini.ai').setup { n_lines = 500 }
-
         -- More icons!
         require('mini.icons').setup()
+
+        -- Autopairs
+        require('mini.pairs').setup()
+
+        -- Split and join args with gS
+        require('mini.splitjoin').setup()
 
         -- Animate
         -- Disable animation when using mouse to scroll
@@ -88,15 +87,73 @@ return {
         local mini_extra = require 'mini.extra'
         mini_extra.setup()
 
+        -- Better Around/Inside textobjects
+        --
+        -- Examples:
+        --  - va)  - [V]isually select [A]round [)]paren
+        --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
+        --  - ci'  - [C]hange [I]nside [']quote
+        local mini_ai = require 'mini.ai'
+        local extra_ai_spec = mini_extra.gen_ai_spec
+        local treesitter_ai_spec = mini_ai.gen_spec.treesitter
+        require('mini.ai').setup {
+            n_lines = 500,
+            custom_textobjects = {
+                B = extra_ai_spec.buffer(),
+                L = extra_ai_spec.line(),
+                N = extra_ai_spec.number(),
+                F = treesitter_ai_spec { a = '@function.outer', i = '@function.inner' },
+                C = treesitter_ai_spec { a = '@class.outer', i = '@class.inner' },
+                S = treesitter_ai_spec { a = '@block.outer', i = '@block.inner' },
+            },
+        }
+
         -- Add/delete/replace surroundings (brackets, quotes, etc.)
         --
         -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
         -- - sd'   - [S]urround [D]elete [']quotes
         -- - sr)'  - [S]urround [R]eplace [)] [']
         require('mini.surround').setup {
-            -- Disable default keybind for s
-            vim.keymap.set({ 'n', 'x' }, 's', '<Nop>'),
+            -- Add custom surroundings to be used on top of builtin ones. For more
+            -- information with examples, see `:h MiniSurround.config`.
+            custom_surroundings = nil,
+
+            -- Duration (in ms) of highlight when calling `MiniSurround.highlight()`
+            highlight_duration = 500,
+
+            -- Module mappings. Use `''` (empty string) to disable one.
+            mappings = {
+                add = '<leader>Sa', -- Add surrounding in Normal and Visual modes
+                delete = '<leader>Sd', -- Delete surrounding
+                find = '<leader>Sf', -- Find surrounding (to the right)
+                find_left = '<leader>SF', -- Find surrounding (to the left)
+                highlight = '<leader>Sh', -- Highlight surrounding
+                replace = '<leader>Sr', -- Replace surrounding
+                update_n_lines = '<leader>Sn', -- Update `n_lines`
+
+                suffix_last = 'l', -- Suffix to search with "prev" method
+                suffix_next = 'n', -- Suffix to search with "next" method
+            },
+
+            -- Number of lines within which surrounding is searched
+            n_lines = 20,
+
+            -- Whether to respect selection type:
+            -- - Place surroundings on separate lines in linewise mode.
+            -- - Place surroundings on each line in blockwise mode.
+            respect_selection_type = false,
+
+            -- How to search for surrounding (first inside current line, then inside
+            -- neighborhood). One of 'cover', 'cover_or_next', 'cover_or_prev',
+            -- 'cover_or_nearest', 'next', 'prev', 'nearest'. For more details,
+            -- see `:h MiniSurround.config`.
+            search_method = 'cover',
+
+            -- Whether to disable showing non-error feedback
+            silent = false,
         }
+        -- Disable default keybind for s (if we don't use it for leap
+        -- vim.keymap.set({ 'n', 'x' }, 's', '<Nop>')
 
         -- Improved f/t jumps to allow for multiple lines
         require('mini.jump').setup {
@@ -192,7 +249,12 @@ return {
                 mini_clue.gen_clues.windows(),
                 mini_clue.gen_clues.z(),
 
-                { mode = 'n', keys = '<leader>s', desc = '+Fuzzy Finder' },
+                { mode = 'n', keys = '<leader>s', desc = '+[S]earch Telescope' },
+                { mode = 'x', keys = '<leader>s', desc = '+[S]earch Telescope' },
+                { mode = 'n', keys = '<leader>t', desc = '+[T]oggle/[T]erminal' },
+                { mode = 'n', keys = '<leader>tl', desc = '+[T]erminal [L]ua' },
+                { mode = 'n', keys = '<leader>S', desc = '+[S]urround' },
+                { mode = 'x', keys = '<leader>S', desc = '+[S]urround' },
             },
 
             window = {

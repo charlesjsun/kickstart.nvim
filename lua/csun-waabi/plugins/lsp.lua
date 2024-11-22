@@ -155,6 +155,8 @@ return {
                         map('<leader>th', function()
                             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
                         end, '[T]oggle Inlay [H]ints')
+
+                        vim.lsp.inlay_hint.enable()
                     end
                 end,
             })
@@ -178,8 +180,25 @@ return {
             local servers = {
                 -- clangd = {},
                 -- gopls = {},
-                -- pyright = {},
-                -- rust_analyzer = {},
+                -- pyright = {
+                --     settings = {
+                --         python = {
+                --             pythonPath = '/home/csun/av/tools/python', -- vim.fn.exepath 'python3',
+                --         },
+                --     },
+                -- },
+                basedpyright = {
+                    settings = {
+                        basedpyright = {
+                            analysis = {
+                                autoSearchPaths = true,
+                                diagnosticMode = 'openFilesOnly',
+                                useLibraryCodeForTypes = true,
+                            },
+                        },
+                    },
+                },
+                rust_analyzer = {},
                 -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
                 --
                 -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -236,4 +255,3 @@ return {
         end,
     },
 }
-

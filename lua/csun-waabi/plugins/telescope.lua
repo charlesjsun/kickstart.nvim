@@ -48,21 +48,35 @@ return { -- Fuzzy Finder (files, lsp, etc)
 
         local telescope = require 'telescope'
         local actions = require 'telescope.actions'
+        local action_layout = require 'telescope.actions.layout'
 
         -- Clone the default Telescope configuration
-        local vimgrep_arguments = { unpack(require('telescope.config').values.vimgrep_arguments) }
-
-        -- I want to search in hidden/dot files.
-        table.insert(vimgrep_arguments, '--hidden')
-        -- I don't want to search in the `.git` directory.
-        table.insert(vimgrep_arguments, '--glob')
-        table.insert(vimgrep_arguments, '!**/.git/*')
+        -- local vimgrep_arguments = { unpack(require('telescope.config').values.vimgrep_arguments) }
+        --
+        -- -- I want to search in hidden/dot files.
+        -- table.insert(vimgrep_arguments, '--hidden')
+        -- -- I don't want to search in the `.git` directory.
+        -- table.insert(vimgrep_arguments, '--glob')
+        -- table.insert(vimgrep_arguments, '!**/.git/*')
 
         telescope.setup {
             -- You can put your default mappings / updates / etc. in here
             --  All the info you're looking for is in `:help telescope.setup()`
             defaults = {
-                vimgrep_arguments = vimgrep_arguments,
+                vimgrep_arguments = {
+                    'rg',
+                    '--color=never',
+                    '--no-heading',
+                    '--with-filename',
+                    '--line-number',
+                    '--column',
+                    -- '--smart-case',
+                    '--ignore-case',
+                    '--trim',
+                    '--hidden',
+                    '--glob',
+                    '!**/.git/*',
+                },
                 preview = {
                     filesize_limit = 10, -- default 25 MB
                 },
@@ -72,11 +86,19 @@ return { -- Fuzzy Finder (files, lsp, etc)
                         ['<C-e>'] = { '<esc>', type = 'command' },
                         ['<esc>'] = actions.close,
                         ['<C-y>'] = actions.select_default,
+                        ['<C-Space>'] = action_layout.toggle_preview,
+                        ['<C-f>'] = actions.to_fuzzy_refine,
                     },
                     n = {
                         ['<C-y>'] = actions.select_default,
                         ['<C-c>'] = actions.close,
+                        ['<C-Space>'] = action_layout.toggle_preview,
+                        ['<C-f>'] = actions.to_fuzzy_refine,
                     },
+                },
+                dynamic_preview_title = true,
+                path_display = {
+                    'truncate',
                 },
                 layout_strategy = 'horizontal',
                 sorting_strategy = 'ascending',
@@ -87,9 +109,18 @@ return { -- Fuzzy Finder (files, lsp, etc)
             pickers = {
                 find_files = {
                     -- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
-                    find_command = { 'rg', '--files', '--hidden', '--glob', '!**/.git/*' },
+                    find_command = {
+                        'rg',
+                        '--files',
+                        '--ignore-case',
+                        '--hidden',
+                        '--glob',
+                        '!**/.git/*',
+                    },
                 },
                 buffers = {
+                    sort_mru = true,
+                    ignore_current_buffer = true,
                     mappings = {
                         n = {
                             ['dd'] = actions.delete_buffer, -- + actions.move_to_top,
@@ -110,6 +141,8 @@ return { -- Fuzzy Finder (files, lsp, etc)
 
         -- See `:help telescope.builtin`
         local builtin = require 'telescope.builtin'
+
+        -- Normal mode keymaps
         vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
         vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
         vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
@@ -121,19 +154,16 @@ return { -- Fuzzy Finder (files, lsp, etc)
         vim.keymap.set('n', '<leader>st', builtin.treesitter, { desc = '[S]earch [T]reesitter' })
         vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch [.]recent files' })
         vim.keymap.set('n', '<leader>s"', builtin.registers, { desc = '[S]earch ["]registers' })
+        vim.keymap.set('n', '<leader>sc', builtin.git_status, { desc = '[S]earch [C]hanges' })
         vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Search existing buffers' })
 
-        -- Slightly advanced example of overriding default behavior and theme
         vim.keymap.set('n', '<leader>/', function()
-            -- You can pass additional configuration to Telescope to change the theme, layout, etc.
             builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
                 winblend = 10,
                 previewer = false,
             })
         end, { desc = '[/] Fuzzily search in current buffer' })
 
-        -- It's also possible to pass additional configuration options.
-        --  See `:help telescope.builtin.live_grep()` for information about particular keys
         vim.keymap.set('n', '<leader>s/', function()
             builtin.live_grep {
                 grep_open_files = true,
@@ -141,9 +171,32 @@ return { -- Fuzzy Finder (files, lsp, etc)
             }
         end, { desc = '[S]earch by grep [/] in Open Files' })
 
-        -- Shortcut for searching your Neovim configuration files
         vim.keymap.set('n', '<leader>sn', function()
             builtin.find_files { cwd = vim.fn.stdpath 'config' }
         end, { desc = '[S]earch [N]eovim files' })
+
+        -- Visual mode keymaps
+        vim.keymap.set('x', '<leader>ss', function()
+            local selection = require('csun-waabi.utils').get_curr_visual_selection()
+            if selection == nil then
+                return
+            end
+            builtin.grep_string {
+                search = selection,
+                prompt_title = 'Find Selection (Grep)',
+            }
+        end, { desc = '[S]earch [S]election' })
+
+        vim.keymap.set('x', '<leader>s/', function()
+            local selection = require('csun-waabi.utils').get_curr_visual_selection()
+            if selection == nil then
+                return
+            end
+            builtin.grep_string {
+                search = selection,
+                prompt_title = 'Find Selection in Open Files (Grep)',
+                grep_open_files = true,
+            }
+        end, { desc = '[S]earch selection [/] in Open Files' })
     end,
 }
