@@ -158,6 +158,8 @@ return {
 
                         vim.lsp.inlay_hint.enable()
                     end
+
+                    -- vim.env.RUSTC = '/home/csun/av/tools/rustc'
                 end,
             })
 
@@ -198,7 +200,51 @@ return {
                         },
                     },
                 },
-                rust_analyzer = {},
+                rust_analyzer = {
+                    -- cmd = { 'rust-analyzer' },
+                    settings = {
+                        ['rust-analyzer'] = {
+                            rustfmt = {
+                                -- overrideCommand = { 'trunk', 'fmt' },
+                                extraArgs = { '--edition=2021' },
+                            },
+                            check = {
+                                overrideCommand = { 'tools/rust_check.sh' },
+                                -- extraEnv = {
+                                --     RUSTC = '/home/csun/av/tools/rustc',
+                                -- },
+                            },
+                            -- runnables = {
+                            --     command = 'tools/cargo',
+                            -- },
+                            -- rustc = {
+                            --     source = '/home/csun/av/Cargo.toml',
+                            -- },
+                            -- cargo = {
+                            --     buildScripts = {
+                            --         enable = true,
+                            --         overrideCommand = { 'tools/rust_check.sh' },
+                            --         --     useRustcWrapper = false,
+                            --     },
+                            --     -- extraEnv = {
+                            --     --     RUSTC = '/home/csun/av/tools/rustc',
+                            --     -- },
+                            -- },
+                            procMacro = {
+                                enable = true,
+                            },
+                            -- diagnostics = {
+                            --     disabled = { 'unresolved-macro-call' },
+                            -- },
+                        },
+                    },
+                },
+
+                -- https://github.com/mrcjkb/rustaceanvim/blob/master/doc/mason.txt
+                -- rust_analyzer = function()
+                --     return true
+                -- end,
+
                 -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
                 --
                 -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -243,6 +289,10 @@ return {
             require('mason-lspconfig').setup {
                 handlers = {
                     function(server_name)
+                        -- if server_name == 'rust_analyzer' then
+                        --     return
+                        -- end
+                        --
                         local server = servers[server_name] or {}
                         -- This handles overriding only values explicitly passed
                         -- by the server configuration above. Useful when disabling

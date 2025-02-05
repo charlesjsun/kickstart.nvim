@@ -23,6 +23,8 @@ return {
             local disable_filetypes = {
                 c = true,
                 cpp = true,
+                -- rs = true,
+                -- rust = true,
             }
             local lsp_format_opt
             if disable_filetypes[vim.bo[bufnr].filetype] then
@@ -45,4 +47,3 @@ return {
         },
     },
 }
-

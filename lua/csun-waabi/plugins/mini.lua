@@ -9,7 +9,22 @@ return {
         require('mini.icons').setup()
 
         -- Autopairs
-        require('mini.pairs').setup()
+        require('mini.pairs').setup {
+            modes = { insert = true, command = false, terminal = false },
+            mappings = {
+                ['('] = { action = 'open', pair = '()', neigh_pattern = '[^\\][^a-zA-Z0-9([{\'"]' },
+                ['['] = { action = 'open', pair = '[]', neigh_pattern = '[^\\][^a-zA-Z0-9([{\'"]' },
+                ['{'] = { action = 'open', pair = '{}', neigh_pattern = '[^\\][^a-zA-Z0-9([{\'"]' },
+
+                [')'] = { action = 'close', pair = '()', neigh_pattern = '[^\\].' },
+                [']'] = { action = 'close', pair = '[]', neigh_pattern = '[^\\].' },
+                ['}'] = { action = 'close', pair = '{}', neigh_pattern = '[^\\].' },
+
+                ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^\\].', register = { cr = false } },
+                ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = '[^%a\\].', register = { cr = false } },
+                ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^\\].', register = { cr = false } },
+            },
+        }
 
         -- Split and join args with gS
         require('mini.splitjoin').setup()
@@ -97,7 +112,7 @@ return {
         local extra_ai_spec = mini_extra.gen_ai_spec
         local treesitter_ai_spec = mini_ai.gen_spec.treesitter
         require('mini.ai').setup {
-            n_lines = 500,
+            n_lines = 1000,
             custom_textobjects = {
                 B = extra_ai_spec.buffer(),
                 L = extra_ai_spec.line(),
