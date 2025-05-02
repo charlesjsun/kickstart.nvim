@@ -5,8 +5,8 @@ return {
         require('winmove').configure {
             keymaps = {
                 help = '?', -- Open floating window with help for the current mode
-                help_close = '<esc>', -- Close the floating help window
-                quit = '<esc>', -- Quit current mode
+                help_close = 'q', -- Close the floating help window
+                quit = 'q', -- Quit current mode
                 toggle_mode = '<tab>', -- Toggle between modes when in a mode
             },
             modes = {

@@ -8,23 +8,28 @@ return {
         -- More icons!
         require('mini.icons').setup()
 
-        -- Autopairs
-        require('mini.pairs').setup {
-            modes = { insert = true, command = false, terminal = false },
-            mappings = {
-                ['('] = { action = 'open', pair = '()', neigh_pattern = '[^\\][^a-zA-Z0-9([{\'"]' },
-                ['['] = { action = 'open', pair = '[]', neigh_pattern = '[^\\][^a-zA-Z0-9([{\'"]' },
-                ['{'] = { action = 'open', pair = '{}', neigh_pattern = '[^\\][^a-zA-Z0-9([{\'"]' },
-
-                [')'] = { action = 'close', pair = '()', neigh_pattern = '[^\\].' },
-                [']'] = { action = 'close', pair = '[]', neigh_pattern = '[^\\].' },
-                ['}'] = { action = 'close', pair = '{}', neigh_pattern = '[^\\].' },
-
-                ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^\\].', register = { cr = false } },
-                ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = '[^%a\\].', register = { cr = false } },
-                ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^\\].', register = { cr = false } },
-            },
+        -- Highlight cursor word
+        require('mini.cursorword').setup {
+            delay = 0,
         }
+
+        -- Autopairs
+        -- require('mini.pairs').setup {
+        --     modes = { insert = true, command = false, terminal = false },
+        --     mappings = {
+        --         ['('] = { action = 'open', pair = '()', neigh_pattern = '[^\\][^a-zA-Z0-9([{\'"]' },
+        --         ['['] = { action = 'open', pair = '[]', neigh_pattern = '[^\\][^a-zA-Z0-9([{\'"]' },
+        --         ['{'] = { action = 'open', pair = '{}', neigh_pattern = '[^\\][^a-zA-Z0-9([{\'"]' },
+        --
+        --         [')'] = { action = 'close', pair = '()', neigh_pattern = '[^\\].' },
+        --         [']'] = { action = 'close', pair = '[]', neigh_pattern = '[^\\].' },
+        --         ['}'] = { action = 'close', pair = '{}', neigh_pattern = '[^\\].' },
+        --
+        --         ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^\\].', register = { cr = false } },
+        --         ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = '[^%a\\].', register = { cr = false } },
+        --         ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^\\].', register = { cr = false } },
+        --     },
+        -- }
 
         -- Split and join args with gS
         require('mini.splitjoin').setup()
@@ -121,6 +126,12 @@ return {
                 C = treesitter_ai_spec { a = '@class.outer', i = '@class.inner' },
                 S = treesitter_ai_spec { a = '@block.outer', i = '@block.inner' },
             },
+        }
+
+        -- Use [ and ] to navigate around
+        require('mini.bracketed').setup {
+            -- Disable creation of mappings for `indent` target in favor of ones from |mini.indentscope|
+            -- indent = { suffix = '' },
         }
 
         -- Add/delete/replace surroundings (brackets, quotes, etc.)
@@ -253,6 +264,10 @@ return {
                 -- `z` key
                 { mode = 'n', keys = 'z' },
                 { mode = 'x', keys = 'z' },
+
+                -- `[` and `]` keys
+                { mode = 'n', keys = '[' },
+                { mode = 'n', keys = ']' },
             },
 
             clues = {

@@ -27,4 +27,19 @@ return {
             disabled_modes = {},
         },
     },
+
+    -- Peek lines when doing :number commands
+    {
+        'nacro90/numb.nvim',
+        config = function()
+            require('numb').setup()
+        end,
+    },
+
+    -- {
+    --     'tzachar/local-highlight.nvim',
+    --     config = function()
+    --         require('local-highlight').setup()
+    --     end,
+    -- },
 }

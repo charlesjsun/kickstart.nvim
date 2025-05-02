@@ -26,6 +26,14 @@ return {
         config = function() end,
     },
 
+    {
+        'nvim-treesitter/nvim-treesitter-context',
+        dependencies = { 'nvim-treesitter/nvim-treesitter' },
+        opts = {
+            multiline_threshold = 1, -- Maximum number of lines to show for a single context
+        },
+    },
+
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
     --

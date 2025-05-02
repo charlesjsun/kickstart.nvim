@@ -21,6 +21,14 @@ return {
         lazy = true,
     },
 
+    -- status bar to show breadcrubs
+    -- {
+    --     'SmiteshP/nvim-navic',
+    --     dependencies = { 'neovim/nvim-lspconfig' },
+    --     opts = {},
+    -- },
+    --
+
     {
         -- Main LSP Configuration
         'neovim/nvim-lspconfig',
@@ -37,6 +45,13 @@ return {
 
             -- Allows extra capabilities provided by nvim-cmp
             'hrsh7th/cmp-nvim-lsp',
+
+            -- rust
+            {
+                'mrcjkb/rustaceanvim',
+                version = '^5', -- Recommended
+                lazy = false, -- This plugin is already lazy
+            },
         },
         config = function()
             -- Brief aside: **What is LSP?**
@@ -71,15 +86,24 @@ return {
             vim.api.nvim_create_autocmd('LspAttach', {
                 group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
                 callback = function(event)
-                    -- NOTE: Remember that Lua is a real programming language, and as such it is possible
-                    -- to define small helper and utility functions so you don't have to repeat yourself.
-                    --
-                    -- In this case, we create a function that lets us more easily define mappings specific
-                    -- for LSP related items. It sets the mode, buffer and description for us each time.
+                    local client = vim.lsp.get_client_by_id(event.data.client_id)
+                    local filetype = vim.fn.getbufvar(event.buf, '&filetype')
+
                     local map = function(keys, func, desc, mode)
                         mode = mode or 'n'
-                        vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
+                        local prefix = 'LSP: '
+                        if filetype == 'rust' then
+                            prefix = 'Rust: '
+                        end
+
+                        vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = prefix .. desc })
                     end
+
+                    -- Remove new nvim 0.11.0 default lsp mappings
+                    -- vim.keymap.del('n', 'gra', { buffer = event.buf })
+                    -- vim.keymap.del('n', jgri', { buffer = event.buf })
+                    -- vim.keymap.del('n', 'grn', { buffer = event.buf })
+                    -- vim.keymap.del('n', 'grr', { buffer = event.buf })
 
                     -- Jump to the definition of the word under your cursor.
                     --  This is where a variable was first declared, or where a function is defined, etc.
@@ -87,11 +111,11 @@ return {
                     map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
 
                     -- Find references for the word under your cursor.
-                    map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+                    map('grr', require('telescope.builtin').lsp_references, 'Goto [R]eferences')
 
                     -- Jump to the implementation of the word under your cursor.
                     --  Useful when your language has ways of declaring types without an actual implementation.
-                    map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+                    map('gri', require('telescope.builtin').lsp_implementations, 'Goto [I]mplementation')
 
                     -- Jump to the type of the word under your cursor.
                     --  Useful when you're not sure what type a variable is and you want to see
@@ -108,22 +132,42 @@ return {
 
                     -- Rename the variable under your cursor.
                     --  Most Language Servers support renaming across files, etc.
-                    map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+                    map('grn', vim.lsp.buf.rename, 'Re[n]ame')
 
                     -- Execute a code action, usually your cursor needs to be on top of an error
                     -- or a suggestion from your LSP for this to activate.
-                    map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
+                    if filetype == 'rust' then
+                        map('gra', function()
+                            vim.cmd.RustLsp 'codeAction'
+                        end, 'Code [A]ction', { 'n', 'x' })
+                    else
+                        map('gra', vim.lsp.buf.code_action, 'Code [A]ction', { 'n', 'x' })
+                    end
 
                     -- WARN: This is not Goto Definition, this is Goto Declaration.
                     --  For example, in C this would take you to the header.
                     map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+
+                    -- Hover action
+                    if filetype == 'rust' then
+                        map('K', function()
+                            vim.cmd.RustLsp { 'hover', 'actions' }
+                        end, 'Hover', 'n')
+                    else
+                        map('K', vim.lsp.buf.hover, 'Hover', 'n')
+                    end
+
+                    if filetype == 'rust' then
+                        map('<leader>me', function()
+                            vim.cmd.RustLsp 'expandMacro'
+                        end, '[M]acro [E]xpand', 'n')
+                    end
 
                     -- The following two autocommands are used to highlight references of the
                     -- word under your cursor when your cursor rests there for a little while.
                     --    See `:help CursorHold` for information about when this is executed
                     --
                     -- When you move your cursor, the highlights will be cleared (the second autocommand).
-                    local client = vim.lsp.get_client_by_id(event.data.client_id)
                     if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
                         local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
                         vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
@@ -158,8 +202,6 @@ return {
 
                         vim.lsp.inlay_hint.enable()
                     end
-
-                    -- vim.env.RUSTC = '/home/csun/av/tools/rustc'
                 end,
             })
 
@@ -200,45 +242,43 @@ return {
                         },
                     },
                 },
-                rust_analyzer = {
-                    -- cmd = { 'rust-analyzer' },
-                    settings = {
-                        ['rust-analyzer'] = {
-                            rustfmt = {
-                                -- overrideCommand = { 'trunk', 'fmt' },
-                                extraArgs = { '--edition=2021' },
-                            },
-                            check = {
-                                overrideCommand = { 'tools/rust_check.sh' },
-                                -- extraEnv = {
-                                --     RUSTC = '/home/csun/av/tools/rustc',
-                                -- },
-                            },
-                            -- runnables = {
-                            --     command = 'tools/cargo',
-                            -- },
-                            -- rustc = {
-                            --     source = '/home/csun/av/Cargo.toml',
-                            -- },
-                            -- cargo = {
-                            --     buildScripts = {
-                            --         enable = true,
-                            --         overrideCommand = { 'tools/rust_check.sh' },
-                            --         --     useRustcWrapper = false,
-                            --     },
-                            --     -- extraEnv = {
-                            --     --     RUSTC = '/home/csun/av/tools/rustc',
-                            --     -- },
-                            -- },
-                            procMacro = {
-                                enable = true,
-                            },
-                            -- diagnostics = {
-                            --     disabled = { 'unresolved-macro-call' },
-                            -- },
-                        },
-                    },
-                },
+                -- rust_analyzer = {
+                --     settings = {
+                --         ['rust-analyzer'] = {
+                --             rustfmt = {
+                --                 extraArgs = { '--edition=2021' },
+                --             },
+                --             check = {
+                --                 overrideCommand = { 'tools/rust_check.sh' },
+                --                 -- extraEnv = {
+                --                 --     RUSTC = '/home/csun/av/tools/rustc',
+                --                 -- },
+                --             },
+                --             -- runnables = {
+                --             --     command = 'tools/cargo',
+                --             -- },
+                --             -- rustc = {
+                --             --     source = '/home/csun/av/Cargo.toml',
+                --             -- },
+                --             -- cargo = {
+                --             --     buildScripts = {
+                --             --         enable = true,
+                --             --         overrideCommand = { 'tools/rust_check.sh' },
+                --             --         --     useRustcWrapper = false,
+                --             --     },
+                --             --     -- extraEnv = {
+                --             --     --     RUSTC = '/home/csun/av/tools/rustc',
+                --             --     -- },
+                --             -- },
+                --             procMacro = {
+                --                 enable = true,
+                --             },
+                --             -- diagnostics = {
+                --             --     disabled = { 'unresolved-macro-call' },
+                --             -- },
+                --         },
+                --     },
+                -- },
 
                 -- https://github.com/mrcjkb/rustaceanvim/blob/master/doc/mason.txt
                 -- rust_analyzer = function()
@@ -289,9 +329,9 @@ return {
             require('mason-lspconfig').setup {
                 handlers = {
                     function(server_name)
-                        -- if server_name == 'rust_analyzer' then
-                        --     return
-                        -- end
+                        if server_name == 'rust_analyzer' then
+                            return
+                        end
                         --
                         local server = servers[server_name] or {}
                         -- This handles overriding only values explicitly passed
@@ -301,6 +341,59 @@ return {
                         require('lspconfig')[server_name].setup(server)
                     end,
                 },
+            }
+
+            -- rustacean configs
+            vim.g.rustaceanvim = {
+                -- Plugin configuration
+                tools = {},
+                -- LSP configuration
+                server = {
+                    on_attach = function(client, bufnr) end,
+                    default_settings = {
+                        -- rust-analyzer language server configuration
+                        ['rust-analyzer'] = {
+                            rustfmt = {
+                                extraArgs = { '--edition=2021' },
+                            },
+                            check = {
+                                overrideCommand = { 'tools/rust_check.sh' },
+                                -- extraEnv = {
+                                --     RUSTC = '/home/csun/av/tools/rustc',
+                                -- },
+                            },
+                            -- runnables = {
+                            --     command = 'tools/cargo',
+                            -- },
+                            -- rustc = {
+                            --     source = '/home/csun/av/Cargo.toml',
+                            -- },
+                            -- cargo = {
+                            --     buildScripts = {
+                            --         enable = true,
+                            --         overrideCommand = { 'tools/rust_check.sh' },
+                            --         --     useRustcWrapper = false,
+                            --     },
+                            --     -- extraEnv = {
+                            --     --     RUSTC = '/home/csun/av/tools/rustc',
+                            --     -- },
+                            -- },
+                            procMacro = {
+                                enable = true,
+                            },
+                            -- diagnostics = {
+                            --     disabled = { 'unresolved-macro-call' },
+                            -- },
+                            semanticHighlighting = {
+                                punctuation = {
+                                    enable = true,
+                                },
+                            },
+                        },
+                    },
+                },
+                -- DAP configuration
+                dap = {},
             }
         end,
     },
