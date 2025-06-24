@@ -1,6 +1,7 @@
 return {
 
     'trunk-io/neovim-trunk',
+    enabled = false,
     lazy = false,
     main = 'trunk',
     dependencies = { 'nvim-telescope/telescope.nvim', 'nvim-lua/plenary.nvim' },

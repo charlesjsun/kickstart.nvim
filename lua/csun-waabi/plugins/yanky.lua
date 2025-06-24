@@ -8,7 +8,7 @@ return {
     },
     config = function()
         local utils = require 'yanky.utils'
-        local mapping = require 'yanky.telescope.mapping'
+        -- local mapping = require 'yanky.telescope.mapping'
 
         require('yanky').setup {
             ring = {
@@ -23,22 +23,22 @@ return {
                 select = {
                     action = nil, -- nil to use default put action
                 },
-                telescope = {
-                    use_default_mappings = false, -- if default mappings should be used
-                    mappings = {
-                        default = mapping.put 'p',
-                        i = {
-                            ['<c-x>'] = mapping.delete(),
-                            ['<c-r>'] = mapping.set_register(utils.get_default_register()),
-                        },
-                        n = {
-                            p = mapping.put 'p',
-                            P = mapping.put 'P',
-                            d = mapping.delete(),
-                            r = mapping.set_register(utils.get_default_register()),
-                        },
-                    },
-                },
+                -- telescope = {
+                --     use_default_mappings = false, -- if default mappings should be used
+                --     mappings = {
+                --         default = mapping.put 'p',
+                --         i = {
+                --             ['<c-x>'] = mapping.delete(),
+                --             ['<c-r>'] = mapping.set_register(utils.get_default_register()),
+                --         },
+                --         n = {
+                --             p = mapping.put 'p',
+                --             P = mapping.put 'P',
+                --             d = mapping.delete(),
+                --             r = mapping.set_register(utils.get_default_register()),
+                --         },
+                --     },
+                -- },
             },
             system_clipboard = {
                 sync_with_ring = false,
@@ -78,13 +78,13 @@ return {
         vim.keymap.set('n', '<c-p>', '<Plug>(YankyPreviousEntry)')
         vim.keymap.set('n', '<c-n>', '<Plug>(YankyNextEntry)')
 
-        local telescope = require 'telescope'
-        telescope.load_extension 'yank_history'
-        vim.keymap.set('n', '<leader>sy', function()
-            telescope.extensions.yank_history.yank_history { previewer = false }
-            -- require('yanky.telescope.yank_history').yank_history {
-            --     previewer = false,
-            -- }
-        end, { desc = '[S]earch [Y]anky history' })
+        -- local telescope = require 'telescope'
+        -- telescope.load_extension 'yank_history'
+        -- vim.keymap.set('n', '<leader>sy', function()
+        --     telescope.extensions.yank_history.yank_history { previewer = false }
+        --     -- require('yanky.telescope.yank_history').yank_history {
+        --     --     previewer = false,
+        --     -- }
+        -- end, { desc = '[S]earch [Y]anky history' })
     end,
 }

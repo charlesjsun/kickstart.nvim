@@ -1,6 +1,6 @@
 return {
     'm4xshen/autoclose.nvim',
-    enable = false,
+    enabled = false,
     config = function()
         require('autoclose').setup {
             keys = {

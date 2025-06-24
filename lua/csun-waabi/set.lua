@@ -56,3 +56,9 @@ vim.opt.scrolloff = 12
 
 -- Recommended by https://github.com/rmagatti/auto-session
 vim.o.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions'
+
+-- Colors in tmux https://www.cyfyifanchen.com/blog/neovim-true-color
+vim.env.NVIM_TUI_ENABLE_TRUE_COLOR = 1
+
+-- vim.opt.guicursor =
+--     'n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175'

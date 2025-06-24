@@ -9,9 +9,9 @@ return {
         require('mini.icons').setup()
 
         -- Highlight cursor word
-        require('mini.cursorword').setup {
-            delay = 0,
-        }
+        -- require('mini.cursorword').setup {
+        --     delay = 100,
+        -- }
 
         -- Autopairs
         -- require('mini.pairs').setup {
@@ -36,43 +36,45 @@ return {
 
         -- Animate
         -- Disable animation when using mouse to scroll
-        local mouse_scrolled = false
-        for _, scroll in ipairs { 'Up', 'Down' } do
-            local key = '<ScrollWheel' .. scroll .. '>'
-            vim.keymap.set({ '', 'i' }, key, function()
-                mouse_scrolled = true
-                return key
-            end, { expr = true })
-        end
-        local max_time = 80
-        local scroll_time = 10
-        local steps = math.floor(max_time / scroll_time)
-        if steps > 60 then
-            steps = 60
-        end
+        -- local mouse_scrolled = false
+        -- for _, scroll in ipairs { 'Up', 'Down' } do
+        --     local key = '<ScrollWheel' .. scroll .. '>'
+        --     vim.keymap.set({ '', 'i' }, key, function()
+        --         mouse_scrolled = true
+        --         return key
+        --     end, { expr = true })
+        -- end
+        -- local max_time = 80
+        -- local scroll_time = 10
+        -- local steps = math.floor(max_time / scroll_time)
+        -- if steps > 60 then
+        --     steps = 60
+        -- end
+
         -- vim.g.mini_animate = true
-        local mini_animate = require 'mini.animate'
-        mini_animate.setup {
-            cursor = {
-                enable = false,
-            },
-            scroll = {
-                -- timing = mini_animate.gen_timing.linear({ duration = 50, unit = 'total' }),
-                timing = mini_animate.gen_timing.linear { duration = scroll_time, unit = 'step', easing = 'in' },
-                subscroll = mini_animate.gen_subscroll.equal {
-                    predicate = function(total_scroll)
-                        if mouse_scrolled then
-                            mouse_scrolled = false
-                            return false
-                        end
-                        return total_scroll > 1
-                    end,
-                    max_output_steps = steps,
-                },
-            },
-            open = { enable = false },
-            close = { enable = false },
-        }
+        -- local mini_animate = require 'mini.animate'
+        -- mini_animate.setup {
+        --     cursor = {
+        --         enable = false,
+        --     },
+        --     scroll = {
+        --         -- timing = mini_animate.gen_timing.linear({ duration = 50, unit = 'total' }),
+        --         timing = mini_animate.gen_timing.linear { duration = scroll_time, unit = 'step', easing = 'in' },
+        --         subscroll = mini_animate.gen_subscroll.equal {
+        --             predicate = function(total_scroll)
+        --                 if mouse_scrolled then
+        --                     mouse_scrolled = false
+        --                     return false
+        --                 end
+        --                 return total_scroll > 1
+        --             end,
+        --             max_output_steps = steps,
+        --         },
+        --     },
+        --     open = { enable = false },
+        --     close = { enable = false },
+        -- }
+
         -- local animate_after = function(input, command)
         --     local pre_command = function()
         --         vim.cmd("normal! " .. input)
@@ -97,7 +99,7 @@ return {
             symbol = '▏',
             options = { try_as_border = true },
             draw = {
-                delay = 50,
+                delay = 100,
                 animation = mini_indentscope.gen_animation.none(),
                 priority = 2,
             },
@@ -285,6 +287,7 @@ return {
                 { mode = 'n', keys = '<leader>tl', desc = '+[T]erminal [L]ua' },
                 { mode = 'n', keys = '<leader>S', desc = '+[S]urround' },
                 { mode = 'x', keys = '<leader>S', desc = '+[S]urround' },
+                { mode = 'n', keys = '<leader>v', desc = '+[V]isits' },
             },
 
             window = {
@@ -304,18 +307,27 @@ return {
             },
         }
 
+        -- Visits
+        local mini_visits = require 'mini.visits'
+        mini_visits.setup()
+
+        vim.keymap.set('n', '<leader>va', mini_visits.add_label, { desc = '[V]isits [A]dd label' })
+        vim.keymap.set('n', '<leader>vd', mini_visits.remove_label, { desc = '[V]isits [D]elete label' })
+
         ------------------------------------------
         ------------------------------------------
         -- Fuzzy finder
         ------------------------------------------
         ------------------------------------------
-        local mini_pick_enabled = false
+        local mini_pick_enabled = true
         if mini_pick_enabled then
+            vim.env.RIPGREP_CONFIG_PATH = '/home/csun/.ripgreprc'
+
             local mini_pick = require 'mini.pick'
 
             local win_config = function()
-                local height = math.floor(0.618 * vim.o.lines)
-                local width = math.floor(0.618 * vim.o.columns)
+                local height = math.floor(0.75 * vim.o.lines)
+                local width = math.floor(0.75 * vim.o.columns)
                 return {
                     anchor = 'NW',
                     height = height,
@@ -337,41 +349,41 @@ return {
 
                 -- Keys for performing actions. See `:h MiniPick-actions`.
                 mappings = {
-                    caret_left = '<Left>',
-                    caret_right = '<Right>',
+                    -- caret_left = '<Left>',
+                    -- caret_right = '<Right>',
 
-                    choose = '<CR>',
-                    choose_in_split = '<C-s>',
-                    choose_in_tabpage = '<C-t>',
-                    choose_in_vsplit = '<C-v>',
-                    choose_marked = '<M-CR>',
+                    -- choose = '<CR>',
+                    -- choose_in_split = '<C-s>',
+                    -- choose_in_tabpage = '<C-t>',
+                    -- choose_in_vsplit = '<C-v>',
+                    -- choose_marked = '<M-y>',
 
-                    delete_char = '<BS>',
-                    delete_char_right = '<Del>',
-                    delete_left = '<C-u>',
-                    delete_word = '<C-w>',
+                    -- delete_char = '<BS>',
+                    -- delete_char_right = '<Del>',
+                    delete_left = '<C-c>',
+                    -- delete_word = '<C-w>',
 
-                    mark = '<C-x>',
-                    mark_all = '<C-a>',
+                    -- mark = '<C-m>',
+                    -- mark_all = '<C-a>',
 
-                    move_down = '<C-n>',
-                    move_start = '<C-g>',
-                    move_up = '<C-p>',
+                    -- move_down = '<C-n>',
+                    -- move_start = '<C-g>',
+                    -- move_up = '<C-p>',
 
-                    paste = '<C-r>',
+                    -- paste = '<C-r>',
 
-                    refine = '<C-Space>',
-                    refine_marked = '<M-Space>',
+                    refine = '<C-f>',
+                    -- refine_marked = '<M-f>',
 
-                    scroll_down = '<C-f>',
-                    scroll_left = '<C-h>',
-                    scroll_right = '<C-l>',
-                    scroll_up = '<C-b>',
+                    scroll_down = '<C-d>',
+                    -- scroll_left = '<C-h>',
+                    -- scroll_right = '<C-l>',
+                    scroll_up = '<C-u>',
 
-                    stop = '<Esc>',
+                    -- stop = '<Esc>',
 
-                    toggle_info = '<S-Tab>',
-                    toggle_preview = '<Tab>',
+                    -- toggle_info = '<S-Tab>',
+                    -- toggle_preview = '<Tab>',
                 },
 
                 -- General options
@@ -409,15 +421,39 @@ return {
             vim.ui.select = mini_pick.ui_select
 
             vim.keymap.set('n', '<leader>sf', mini_pick.builtin.files, { desc = '[S]earch [F]iles' })
+            vim.keymap.set('n', '<leader>sg', mini_pick.builtin.grep_live, { desc = '[S]earch by [G]rep' })
+            vim.keymap.set('n', '<leader>sw', function()
+                local word = vim.fn.expand '<cword>'
+                mini_pick.builtin.grep({ pattern = word }, { source = { name = 'Grep: ' .. word } })
+            end, { desc = '[S]earch current [W]ord' })
             vim.keymap.set('n', '<leader>sh', mini_pick.builtin.help, { desc = '[S]earch [H]elp' })
             vim.keymap.set('n', '<leader>sk', mini_extra.pickers.keymaps, { desc = '[S]earch [K]eymaps' })
             vim.keymap.set('n', '<leader>sn', function()
                 mini_pick.builtin.files(nil, { source = { cwd = vim.fn.stdpath 'config' } })
             end, { desc = '[S]earch [N]eovim files' })
+            vim.keymap.set('n', '<leader>sc', mini_extra.pickers.git_hunks, { desc = '[S]earch [C]hanges' })
             vim.keymap.set('n', '<leader>sr', mini_pick.builtin.resume, { desc = '[S]earch [R]esume' })
             vim.keymap.set('n', '<leader>s.', mini_extra.pickers.oldfiles, { desc = '[S]earch [.]recent Files' })
             vim.keymap.set('n', '<leader>s"', mini_extra.pickers.registers, { desc = '[S]earch ["]registers' })
-            vim.keymap.set('n', '<leader><leader>', mini_pick.builtin.buffers, { desc = '[ ] Search buffers' })
+            vim.keymap.set('n', '<leader><leader>', function()
+                -- local wipeout_cur = function()
+                --     vim.api.nvim_buf_delete(mini_pick.get_picker_matches().current.bufnr, {})
+                -- end
+                -- local buffer_mappings = { wipeout = { char = '<C-x>', func = wipeout_cur } }
+                -- mini_pick.builtin.buffers({ include_current = false }, { mappings = buffer_mappings })
+                local curr_filepath = vim.api.nvim_buf_get_name(0)
+                local is_not_curr_file = function(path_data)
+                    return path_data.path ~= curr_filepath and vim.fn.isdirectory(path_data.path) == 0
+                end
+                mini_extra.pickers.visit_paths({
+                    recency_weight = 1.0,
+                    filter = is_not_curr_file,
+                }, nil)
+            end, { desc = '[ ] Search visits' })
+
+            vim.keymap.set('n', '<leader>sv', function()
+                mini_extra.pickers.visit_labels({}, nil)
+            end, { desc = '[S]earch [V]isit labels' })
         end
 
         -- Simple and easy statusline.
