@@ -55,7 +55,7 @@ return {
         },
         config = function()
             vim.api.nvim_create_autocmd('LspAttach', {
-                group = vim.api.nvim_create_augroup('my-lsp-attach', { clear = true }),
+                group = vim.api.nvim_create_augroup('lsp_attach_set_keybinds', { clear = true }),
                 callback = function(event)
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
                     local filetype = vim.fn.getbufvar(event.buf, '&filetype')
@@ -207,6 +207,21 @@ return {
                 end,
             })
 
+            vim.api.nvim_create_autocmd('LspAttach', {
+                group = vim.api.nvim_create_augroup('lsp_attach_disable_ruff_hover', { clear = true }),
+                callback = function(args)
+                    local client = vim.lsp.get_client_by_id(args.data.client_id)
+                    if client == nil then
+                        return
+                    end
+                    if client.name == 'ruff' then
+                        -- Disable hover in favor of Pyright
+                        client.server_capabilities.hoverProvider = false
+                    end
+                end,
+                desc = 'LSP: Disable hover capability from Ruff',
+            })
+
             -- LSP servers and clients are able to communicate to each other what features they support.
             --  By default, Neovim doesn't support everything that is in the LSP specification.
             --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
@@ -248,29 +263,51 @@ return {
             }
             vim.lsp.enable 'luals'
 
-            vim.lsp.config['basedpyright'] = {
-                cmd = { 'basedpyright-langserver', '--stdio' },
+            -- vim.lsp.config['basedpyright'] = {
+            --     cmd = { 'basedpyright-langserver', '--stdio' },
+            --     filetypes = { 'python' },
+            --     root_markers = {
+            --         'pyproject.toml',
+            --         'setup.py',
+            --         'setup.cfg',
+            --         'requirements.txt',
+            --         'Pipfile',
+            --         'pyrightconfig.json',
+            --         '.git',
+            --     },
+            --     settings = {
+            --         basedpyright = {
+            --             analysis = {
+            --                 autoSearchPaths = true,
+            --                 useLibraryCodeForTypes = true,
+            --                 diagnosticMode = 'openFilesOnly',
+            --             },
+            --         },
+            --     },
+            -- }
+            -- vim.lsp.enable 'basedpyright'
+
+            vim.lsp.config['pyrefly'] = {
+                cmd = { 'pyrefly', 'lsp' },
                 filetypes = { 'python' },
-                root_markers = {
+                rootPatterns = {
+                    'pyrefly.toml',
                     'pyproject.toml',
-                    'setup.py',
-                    'setup.cfg',
-                    'requirements.txt',
-                    'Pipfile',
-                    'pyrightconfig.json',
                     '.git',
                 },
-                settings = {
-                    basedpyright = {
-                        analysis = {
-                            autoSearchPaths = true,
-                            useLibraryCodeForTypes = true,
-                            diagnosticMode = 'openFilesOnly',
-                        },
+            }
+            vim.lsp.enable 'pyrefly'
+
+            vim.lsp.config['ruff'] = {
+                cmd = { 'ruff', 'server' },
+                filetypes = { 'python' },
+                init_options = {
+                    settings = {
+                        configuration = '.ruff.toml',
                     },
                 },
             }
-            vim.lsp.enable 'basedpyright'
+            vim.lsp.enable 'ruff'
 
             -- vim.lsp.config['bzl'] = {
             --     cmd = { 'bzl', 'lsp', 'serve' },

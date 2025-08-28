@@ -39,25 +39,28 @@ return {
         end,
         formatters_by_ft = {
             lua = { 'stylua' },
-            python = { 'trunk' },
+            -- python = { 'trunk' },
             -- python = { 'ruff_fix' },
+            python = { 'ruff_isort', 'ruff_format' },
             -- You can use 'stop_after_first' to run the first available formatter from the list
             -- javascript = { "prettierd", "prettier", stop_after_first = true },
         },
         formatters = {
-            trunk = {
-                command = 'trunk',
-                args = { 'fmt', '$FILENAME' },
+            -- trunk = {
+            --     command = 'trunk',
+            --     args = { 'fmt', '$FILENAME' },
+            --     stdin = false,
+            -- },
+            ruff_isort = {
+                command = 'ruff',
+                args = { 'check', '--select', 'I', '--fix', '$FILENAME' },
                 stdin = false,
             },
-            -- ruff = {
-            --     command = 'ruff',
-            --     args = { 'format', '--line-length=120', '$FILENAME' },
-            -- },
-            -- ruff_isort = {
-            --     command = 'ruff',
-            --     args = { 'check', '--select', 'I', '--fix', '--line-length=120', '$FILENAME' },
-            -- },
+            ruff_format = {
+                command = 'ruff',
+                args = { 'format', '$FILENAME' },
+                stdin = false,
+            },
         },
     },
 }
