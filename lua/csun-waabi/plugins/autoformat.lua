@@ -15,8 +15,8 @@ return {
     },
     opts = {
         notify_on_error = false,
-        -- Disable format on save because Waabi has own formatter
-        format_on_save = function(bufnr)
+        -- format_on_save = function(bufnr)
+        format_after_save = function(bufnr)
             -- Disable "format_on_save lsp_fallback" for languages that don't
             -- have a well standardized coding style. You can add additional
             -- languages here or re-enable it for the disabled ones.
@@ -33,17 +33,31 @@ return {
                 lsp_format_opt = 'fallback'
             end
             return {
-                timeout_ms = 500,
+                -- timeout_ms = 2000,
                 lsp_format = lsp_format_opt,
             }
         end,
         formatters_by_ft = {
             lua = { 'stylua' },
-            -- Conform can also run multiple formatters sequentially
-            -- python = { "ruff_format" },
-            --
+            python = { 'trunk' },
+            -- python = { 'ruff_fix' },
             -- You can use 'stop_after_first' to run the first available formatter from the list
             -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        },
+        formatters = {
+            trunk = {
+                command = 'trunk',
+                args = { 'fmt', '$FILENAME' },
+                stdin = false,
+            },
+            -- ruff = {
+            --     command = 'ruff',
+            --     args = { 'format', '--line-length=120', '$FILENAME' },
+            -- },
+            -- ruff_isort = {
+            --     command = 'ruff',
+            --     args = { 'check', '--select', 'I', '--fix', '--line-length=120', '$FILENAME' },
+            -- },
         },
     },
 }

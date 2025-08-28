@@ -272,6 +272,30 @@ return {
             }
             vim.lsp.enable 'basedpyright'
 
+            -- vim.lsp.config['bzl'] = {
+            --     cmd = { 'bzl', 'lsp', 'serve' },
+            --     filetypes = { 'bzl' },
+            --     root_dir = 'WORKSPACE',
+            -- }
+            -- vim.lsp.enable 'bzl'
+
+            -- vim.lsp.config['starlark-rust'] = {
+            --     cmd = { 'starlark', '--lsp' },
+            --     filetypes = { 'bzl' },
+            --     root_markers = { 'WORKSPACE' },
+            --     -- root_dir = function(fname)
+            --     --     return vim.fs.dirname(vim.fs.find('.git', { path = fname, upward = true })[1])
+            --     -- end,
+            -- }
+            -- vim.lsp.enable 'starlark-rust'
+
+            vim.lsp.config['bazel-lsp'] = {
+                cmd = { 'bazel-lsp' },
+                filetypes = { 'bzl' },
+                root_markers = { 'WORKSPACE' },
+            }
+            vim.lsp.enable 'bazel-lsp'
+
             -- rustacean configs
             vim.g.rustaceanvim = {
                 -- Plugin configuration
