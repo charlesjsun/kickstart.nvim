@@ -281,9 +281,10 @@ return {
                 mini_clue.gen_clues.windows(),
                 mini_clue.gen_clues.z(),
 
-                { mode = 'n', keys = '<leader>s', desc = '+[S]earch Telescope' },
-                { mode = 'x', keys = '<leader>s', desc = '+[S]earch Telescope' },
+                { mode = 'n', keys = '<leader>s', desc = '+[S]earch Pick' },
+                { mode = 'x', keys = '<leader>s', desc = '+[S]earch Pick' },
                 { mode = 'n', keys = '<leader>t', desc = '+[T]oggle/[T]erminal' },
+                { mode = 'x', keys = '<leader>t', desc = '+[T]erminal' },
                 { mode = 'n', keys = '<leader>tl', desc = '+[T]erminal [L]ua' },
                 { mode = 'n', keys = '<leader>S', desc = '+[S]urround' },
                 { mode = 'x', keys = '<leader>S', desc = '+[S]urround' },
@@ -299,7 +300,7 @@ return {
                 },
 
                 -- Delay before showing clue window
-                delay = 500,
+                delay = 250,
 
                 -- Keys to scroll inside the clue window
                 scroll_down = '<C-d>',

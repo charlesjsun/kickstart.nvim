@@ -12,7 +12,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Setup all lazy plugins
 require('lazy').setup({
-    spec = 'csun-waabi.plugins',
+    spec = 'plugins',
     change_detection = { notify = false },
 }, {
     ui = {

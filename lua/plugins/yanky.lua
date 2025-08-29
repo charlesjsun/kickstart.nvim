@@ -1,11 +1,11 @@
 return {
     'gbprod/yanky.nvim',
-    dependencies = {
-        {
-            'nvim-telescope/telescope.nvim',
-            dependencies = { 'nvim-lua/plenary.nvim' },
-        },
-    },
+    -- dependencies = {
+    --     {
+    --         'nvim-telescope/telescope.nvim',
+    --         dependencies = { 'nvim-lua/plenary.nvim' },
+    --     },
+    -- },
     config = function()
         local utils = require 'yanky.utils'
         -- local mapping = require 'yanky.telescope.mapping'

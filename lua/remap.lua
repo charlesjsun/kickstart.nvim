@@ -36,7 +36,7 @@ vim.keymap.set('v', 'H', '<gv')
 vim.keymap.set('n', 'S', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = 'Search and replace current word' })
 -- Search and replace highlighted text
 vim.keymap.set('x', '<leader>r', function()
-    local selection = require('csun-waabi.utils').get_curr_visual_selection()
+    local selection = require('utils').get_curr_visual_selection()
     if selection == nil then
         return
     end

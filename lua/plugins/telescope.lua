@@ -186,7 +186,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
 
         -- Visual mode keymaps
         vim.keymap.set('x', '<leader>ss', function()
-            local selection = require('csun-waabi.utils').get_curr_visual_selection()
+            local selection = require('utils').get_curr_visual_selection()
             if selection == nil then
                 return
             end
@@ -197,7 +197,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
         end, { desc = '[S]earch [S]election' })
 
         vim.keymap.set('x', '<leader>s/', function()
-            local selection = require('csun-waabi.utils').get_curr_visual_selection()
+            local selection = require('utils').get_curr_visual_selection()
             if selection == nil then
                 return
             end

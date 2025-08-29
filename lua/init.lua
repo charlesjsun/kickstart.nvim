@@ -1,7 +1,3 @@
-require 'csun-waabi.set'
-require 'csun-waabi.remap'
-require 'csun-waabi.lazy_init'
-
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -13,4 +9,3 @@ vim.api.nvim_create_autocmd('TextYankPost', {
         vim.highlight.on_yank()
     end,
 })
-

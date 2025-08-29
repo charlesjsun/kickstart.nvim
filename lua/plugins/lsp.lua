@@ -1,20 +1,20 @@
 return {
     -- LSP Plugins
 
-    {
-        -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
-        -- used for completion, annotations and signatures of Neovim apis
-        'folke/lazydev.nvim',
-        enabled = true,
-        ft = 'lua',
-        opts = {
-            library = {
-                -- Load luvit types when the `vim.uv` word is found
-                { path = 'luvit-meta/library', words = { 'vim%.uv' } },
-                -- { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
-            },
-        },
-    },
+    -- {
+    --     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
+    --     -- used for completion, annotations and signatures of Neovim apis
+    --     'folke/lazydev.nvim',
+    --     enabled = true,
+    --     ft = 'lua',
+    --     opts = {
+    --         library = {
+    --             -- Load luvit types when the `vim.uv` word is found
+    --             { path = 'luvit-meta/library', words = { 'vim%.uv' } },
+    --             -- { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
+    --         },
+    --     },
+    -- },
 
     {
         'Bilal2453/luvit-meta',
@@ -55,6 +55,20 @@ return {
             },
         },
         config = function()
+            -- vim.api.nvim_create_autocmd('LspProgress', {
+            --     group = vim.api.nvim_create_augroup('lsp_progress_print', { clear = true }),
+            --     callback = function(ev)
+            --         local value = ev.data.params.value
+            --         if value.kind == 'begin' then
+            --             print(vim.inspect(value))
+            --         elseif value.kind == 'end' then
+            --             print(vim.inspect(value))
+            --         elseif value.kind == 'report' then
+            --             print(vim.inspect(value))
+            --         end
+            --     end,
+            -- })
+            --
             vim.api.nvim_create_autocmd('LspAttach', {
                 group = vim.api.nvim_create_augroup('lsp_attach_set_keybinds', { clear = true }),
                 callback = function(event)
@@ -165,7 +179,7 @@ return {
                     --
                     -- When you move your cursor, the highlights will be cleared (the second autocommand).
                     if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-                        local highlight_augroup = vim.api.nvim_create_augroup('my-lsp-highlight', { clear = false })
+                        local highlight_augroup = vim.api.nvim_create_augroup('lsp_attach_lsp_highlight', { clear = false })
                         vim.api.nvim_create_autocmd({ 'CursorHold' }, {
                             buffer = event.buf,
                             group = highlight_augroup,
@@ -179,10 +193,10 @@ return {
                         })
 
                         vim.api.nvim_create_autocmd('LspDetach', {
-                            group = vim.api.nvim_create_augroup('my-lsp-detach', { clear = true }),
+                            group = vim.api.nvim_create_augroup('lsp_attach_lsp_detach_clear_highlight', { clear = true }),
                             callback = function(event2)
                                 vim.lsp.buf.clear_references()
-                                vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
+                                vim.api.nvim_clear_autocmds { group = 'lsp_attach_lsp_highlight', buffer = event2.buf }
                             end,
                         })
                     end
@@ -196,7 +210,7 @@ return {
                             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
                         end, '[T]oggle Inlay [H]ints')
 
-                        vim.lsp.inlay_hint.enable()
+                        vim.lsp.inlay_hint.enable(true)
                     end
 
                     -- autocomplete
@@ -241,27 +255,81 @@ return {
             --
             require('mason').setup()
 
-            vim.lsp.config['luals'] = {
+            vim.lsp.config['lua_ls'] = {
                 cmd = { 'lua-language-server' },
                 filetypes = { 'lua' },
-                root_markers = { '.luarc.json', '.luarc.jsonc' },
-                telemetry = { enabled = false },
-                formatters = {
-                    ignoreComments = false,
+                root_markers = {
+                    '.luarc.json',
+                    '.luarc.jsonc',
+                    '.luacheckrc',
+                    '.stylua.toml',
+                    'stylua.toml',
+                    'selene.toml',
+                    'selene.yml',
+                    '.git',
                 },
+                -- single_file_support = true,
+                -- telemetry = { enabled = false },
+                -- formatters = {
+                --     ignoreComments = false,
+                -- },
                 settings = {
                     Lua = {
-                        runtime = {
-                            version = 'LuaJIT',
-                        },
-                        signatureHelp = { enabled = true },
+                        -- runtime = {
+                        --     version = 'LuaJIT',
+                        --     path = {
+                        --         '?.lua',
+                        --         '?/init.lua',
+                        --     },
+                        -- },
+                        -- signatureHelp = { enabled = true },
                         -- completion = {
                         --     callSnippet = 'Replace',
                         -- },
                     },
                 },
+                on_init = function(client)
+                    if client.workspace_folders then
+                        local path = client.workspace_folders[1].name
+                        if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then
+                            return
+                        end
+                    end
+
+                    client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+                        runtime = {
+                            -- Tell the language server which version of Lua you're using (most
+                            -- likely LuaJIT in the case of Neovim)
+                            version = 'LuaJIT',
+                            -- Tell the language server how to find Lua modules same way as Neovim
+                            -- (see `:h lua-module-load`)
+                            path = {
+                                'lua/?.lua',
+                                'lua/?/init.lua',
+                            },
+                        },
+                        -- Make the server aware of Neovim runtime files
+                        workspace = {
+                            checkThirdParty = false,
+                            library = {
+                                vim.env.VIMRUNTIME,
+                                -- Depending on the usage, you might want to add additional paths
+                                -- here.
+                                '${3rd}/luv/library',
+                                -- '${3rd}/busted/library'
+                            },
+                            -- Or pull in all of 'runtimepath'.
+                            -- NOTE: this is a lot slower and will cause issues when working on
+                            -- your own configuration.
+                            -- See https://github.com/neovim/nvim-lspconfig/issues/3189
+                            -- library = {
+                            --   vim.api.nvim_get_runtime_file('', true),
+                            -- }
+                        },
+                    })
+                end,
             }
-            vim.lsp.enable 'luals'
+            vim.lsp.enable 'lua_ls'
 
             -- vim.lsp.config['basedpyright'] = {
             --     cmd = { 'basedpyright-langserver', '--stdio' },
