@@ -11,6 +11,7 @@ return {
             library = {
                 -- Load luvit types when the `vim.uv` word is found
                 { path = 'luvit-meta/library', words = { 'vim%.uv' } },
+                -- { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
             },
         },
     },
@@ -18,7 +19,7 @@ return {
     {
         'Bilal2453/luvit-meta',
         enabled = true,
-        lazy = true,
+        -- lazy = true,
     },
 
     -- status bar to show breadcrubs
@@ -70,6 +71,20 @@ return {
                         vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = prefix .. desc })
                     end
 
+                    local mini_extra_picker = function(func)
+                        local callable = function()
+                            local on_list = function(opts)
+                                if table.getn(opts.items) > 1 then
+                                    require('mini.extra').pickers.lsp { scope = func }
+                                else
+                                    vim.lsp.buf[func]()
+                                end
+                            end
+                            vim.lsp.buf[func] { on_list = on_list }
+                        end
+                        return callable
+                    end
+
                     -- Remove new nvim 0.11.0 default lsp mappings
                     -- vim.keymap.del('n', 'gra', { buffer = event.buf })
                     -- vim.keymap.del('n', 'gri', { buffer = event.buf })
@@ -80,37 +95,22 @@ return {
                     --  This is where a variable was first declared, or where a function is defined, etc.
                     --  To jump back, press <C-t>.
                     -- map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-                    map('gd', function()
-                        local on_list = function(opts)
-                            if table.getn(opts.items) > 1 then
-                                require('mini.extra').pickers.lsp { scope = 'definition' }
-                            else
-                                vim.lsp.buf.definition()
-                            end
-                        end
-                        vim.lsp.buf.definition { on_list = on_list }
-                    end, '[G]oto [D]efinition')
+                    map('gd', mini_extra_picker 'definition', '[G]oto [D]efinition')
 
                     -- Find references for the word under your cursor.
                     -- map('grr', require('telescope.builtin').lsp_references, 'Goto [R]eferences')
-                    map('grr', function()
-                        require('mini.extra').pickers.lsp { scope = 'references' }
-                    end, '[G]oto [R]eferences')
+                    map('grr', mini_extra_picker 'references', '[G]oto [R]eferences')
 
                     -- Jump to the implementation of the word under your cursor.
                     --  Useful when your language has ways of declaring types without an actual implementation.
                     -- map('gri', require('telescope.builtin').lsp_implementations, 'Goto [I]mplementation')
-                    map('gri', function()
-                        require('mini.extra').pickers.lsp { scope = 'implementation' }
-                    end, 'Goto [I]mplementation')
+                    map('gri', mini_extra_picker 'implementation', 'Goto [I]mplementation')
 
                     -- Jump to the type of the word under your cursor.
                     --  Useful when you're not sure what type a variable is and you want to see
                     --  the definition of its *type*, not where it was *defined*.
                     -- map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
-                    map('<leader>D', function()
-                        require('mini.extra').pickers.lsp { scope = 'type_definition' }
-                    end, 'Type [D]efinition')
+                    map('grt', mini_extra_picker 'type_definition', '[G]oto [T]ype Definition')
 
                     -- Fuzzy find all the symbols in your current document.
                     --  Symbols are things like variables, functions, types, etc.
@@ -215,7 +215,7 @@ return {
                         return
                     end
                     if client.name == 'ruff' then
-                        -- Disable hover in favor of Pyright
+                        -- Disable hover in favor of Pyrefly
                         client.server_capabilities.hoverProvider = false
                     end
                 end,
